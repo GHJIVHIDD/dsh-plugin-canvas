@@ -1,0 +1,49 @@
+{
+  "name": "@deepseek-ai/dsh-plugin-canvas",
+  "version": "0.1.0",
+  "description": "Canvas preview plugin for DeepSeek Harness (DSH): a 画布 (Canvas) tab next to chat/trajectory for interactive HTML design prototyping, with canvas_preview model tool (render/annotate/clear), local file/URL preview, privacy masking and sandboxed iframe rendering.",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "verify": "node scripts/verify.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "canvas",
+    "preview",
+    "design",
+    "prototype",
+    "plugin",
+    "web"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "license": "MIT"
+}

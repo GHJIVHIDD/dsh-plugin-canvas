@@ -1,0 +1,5 @@
+# Canvas (deployment plugin): inserts the "画布" tab into the conversation view.
+# The host half serves /canvas-api/* routes and registers canvas_preview tool.
+- insert:
+    - id: ui-canvas
+      name: '@deepseek-ai/dsh-plugin-canvas'
