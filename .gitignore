@@ -13,9 +13,11 @@ Thumbs.db
 .vscode/
 *.swp
 
-# Installation packages are published as GitHub Releases, not committed to source.
+# Installation packages: keep root tarballs untracked, but commit releases/ artifacts.
 *.tgz
 *.zip
+!releases/*.tgz
+!releases/*.zip
 
 # Local credential store (never commit)
 .git-credentials

@@ -61,14 +61,23 @@ allowBuilds:
 
 然后重新执行安装命令。
 
-### 方式 B：本地目录 / tarball
+### 方式 B：直接下载仓库内安装包 / tarball
+
+仓库已内置安装包：`releases/dsh-plugin-canvas-0.1.0.tgz`，可直接下载：
 
 ```bash
-# 本地源码目录
-dsh plugin --profile web add /path/to/dsh-plugin-canvas
+# 下载仓库内已提交的 tgz
+curl -L -o dsh-plugin-canvas-0.1.0.tgz \
+  https://github.com/GHJIVHIDD/dsh-plugin-canvas/raw/main/releases/dsh-plugin-canvas-0.1.0.tgz
 
-# 或从 Releases 下载 tgz 后安装
+# 然后安装
 dsh plugin --profile web add ./dsh-plugin-canvas-0.1.0.tgz
+```
+
+也可以使用本地源码目录：
+
+```bash
+dsh plugin --profile web add /path/to/dsh-plugin-canvas
 ```
 
 ### 方式 C：免 pnpm 手动安装脚本
@@ -192,6 +201,8 @@ dsh-plugin-canvas/
 │   └── types/index.d.ts  # host 类型声明
 ├── scripts/verify.mjs    # 离线验证
 ├── install.sh            # 免 pnpm 安装脚本
+├── releases/
+│   └── dsh-plugin-canvas-0.1.0.tgz  # 已提交的安装包
 └── README.md / LICENSE
 ```
 
