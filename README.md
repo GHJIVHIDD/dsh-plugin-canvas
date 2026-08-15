@@ -63,17 +63,23 @@ allowBuilds:
 
 ### 方式 B：从 GitHub Releases 下载安装包 / tarball
 
-安装包发布在 GitHub Releases，不放入源码目录：
+安装包发布在 GitHub Releases，不放入源码目录。直接下载：
 
 ```bash
-# 打开 Releases 页面下载 dsh-plugin-canvas-0.1.0.tgz
-# https://github.com/GHJIVHIDD/dsh-plugin-canvas/releases
+curl -L -o dsh-plugin-canvas-0.1.0.tgz \
+  https://github.com/GHJIVHIDD/dsh-plugin-canvas/releases/download/v0.1.0/dsh-plugin-canvas-0.1.0.tgz
 
 # 下载后安装
 dsh plugin --profile web add ./dsh-plugin-canvas-0.1.0.tgz
 ```
 
-也可以使用本地源码目录：
+也可以打开 Releases 页面手动下载：
+
+```text
+https://github.com/GHJIVHIDD/dsh-plugin-canvas/releases
+```
+
+或者使用本地源码目录：
 
 ```bash
 dsh plugin --profile web add /path/to/dsh-plugin-canvas
