@@ -1,5 +1,13 @@
 # Canvas (deployment plugin): inserts the "画布" tab into the conversation view.
 # The host half serves /canvas-api/* routes and registers canvas_preview tool.
+#
+# IMPORTANT: choose only ONE registration path.
+#   - If you use `dsh plugin add github:GHJIVHIDD/dsh-plugin-canvas`, this patch
+#     is applied automatically by the bundle layer; do NOT also add it manually
+#     to cordis.patch.yml.
+#   - If you use ./install.sh (manual patch method), this patch is required, and
+#     install.sh will remove the plugin from dsh.profile.bundles to avoid the
+#     duplicate `ui-canvas` loader entry.
 - insert:
     - id: ui-canvas
       name: '@deepseek-ai/dsh-plugin-canvas'

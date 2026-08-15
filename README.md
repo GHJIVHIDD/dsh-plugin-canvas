@@ -41,6 +41,13 @@
 
 ## 🚀 Install / 安装
 
+> ⚠️ **重要：每个插件只注册一次，不要同时使用两条安装路径。**
+>
+> - `dsh plugin add`（方式 A / B）会把插件加入 `dsh.profile.bundles`，插件自带的 `cordis.patch.yml` 会作为 bundle 层自动生效，**不需要再手动往 `cordis.patch.yml` 里加 `ui-canvas`**。
+> - `./install.sh` 或手动 patch（方式 C / D）走 `cordis.patch.yml` 注册，**不要再用 `dsh plugin add`**。
+> - 如果同时出现两份 `ui-canvas`，DSH 会报 `duplicate loader entry id: ui-canvas`。修复方式：二选一删除。`./install.sh` 已会自动从 `dsh.profile.bundles` 中移除本插件，避免重复。
+
+
 ### 方式 A：从 GitHub 源码安装（推荐）
 
 ```bash
@@ -66,11 +73,11 @@ allowBuilds:
 安装包发布在 GitHub Releases，不放入源码目录。直接下载：
 
 ```bash
-curl -L -o dsh-plugin-canvas-0.1.0.tgz \
-  https://github.com/GHJIVHIDD/dsh-plugin-canvas/releases/download/v0.1.0/dsh-plugin-canvas-0.1.0.tgz
+curl -L -o dsh-plugin-canvas-0.1.1.tgz \
+  https://github.com/GHJIVHIDD/dsh-plugin-canvas/releases/download/v0.1.1/dsh-plugin-canvas-0.1.1.tgz
 
 # 下载后安装
-dsh plugin --profile web add ./dsh-plugin-canvas-0.1.0.tgz
+dsh plugin --profile web add ./dsh-plugin-canvas-0.1.1.tgz
 ```
 
 也可以打开 Releases 页面手动下载：
@@ -93,7 +100,7 @@ cd dsh-plugin-canvas
 ./install.sh
 ```
 
-脚本会将插件复制到 `~/.dsh/profiles/web/node_modules/@deepseek-ai/dsh-plugin-canvas`，并自动把 `ui-canvas` 补丁写入 `cordis.patch.yml`。可用环境变量指定位置：
+脚本会将插件复制到 `~/.dsh/profiles/web/node_modules/@deepseek-ai/dsh-plugin-canvas`，自动把 `ui-canvas` 补丁写入 `cordis.patch.yml`，并自动从 `dsh.profile.bundles` 中移除本插件（如有），避免重复注册。可用环境变量指定位置：
 
 ```bash
 DSH_HOME=/path/to/.dsh DSH_PROFILE=web ./install.sh
@@ -119,6 +126,36 @@ dsh --profile web
 ```
 
 打开 Web 界面进入任意会话，在会话视图环中点击「画布」即可看到当前画布；智能体也可以通过 `canvas_preview` 工具自动渲染和标注。
+
+## 🩹 Troubleshooting / 常见问题
+
+### 报错 `duplicate loader entry id: ui-canvas`
+
+原因：插件被同时注册到了两处：
+
+1. `~/.dsh/profiles/web/package.json` 的 `dsh.profile.bundles` 中包含 `@deepseek-ai/dsh-plugin-canvas`
+2. `~/.dsh/profiles/web/cordis.patch.yml` 中也手动插入了 `ui-canvas`
+
+修复（二选一）：
+
+```bash
+# 方案 1：保留 bundles 注册，删除 cordis.patch.yml 中的 ui-canvas 条目
+# 方案 2：保留 patch 注册，从 package.json 的 bundles 中移除 @deepseek-ai/dsh-plugin-canvas
+```
+
+如果使用本仓库的 `./install.sh`，脚本会自动执行方案 2 的清理，并将原 `package.json` 备份为 `package.json.bak`。
+
+### 打开画布页签提示 `⚠ HTTP 200`
+
+通常是修改插件后没有重启 `dsh web`，导致浏览器拿到 SPA 的 HTML 而不是 API JSON。请重启：
+
+```bash
+# 先停掉当前 dsh web，再重新启动
+dsh --profile web
+```
+
+如果重启后仍然 `HTTP 200`，请用 `dsh --profile web --dump-config` 检查 `ui-canvas` 是否只出现一次。
+
 
 ## 🧩 Architecture / 架构
 

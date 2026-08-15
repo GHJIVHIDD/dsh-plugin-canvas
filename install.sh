@@ -31,6 +31,30 @@ cp -R "$SRC_DIR"/. "$DEST_DIR"/
 rm -rf "$DEST_DIR/.git" "$DEST_DIR/.git-credentials" "$DEST_DIR"/*.tgz "$DEST_DIR"/*.zip
 echo "installed plugin files -> $DEST_DIR"
 
+# Prevent duplicate registration: if this plugin was previously added via
+# `dsh plugin add`, it would be in dsh.profile.bundles AND in cordis.patch.yml.
+# This script uses the patch method, so remove it from bundles (backup first).
+if command -v node >/dev/null 2>&1; then
+  node - "$PROFILE_DIR/package.json" "$PLUGIN_NAME" <<'NODE'
+const fs = require('fs');
+const [pkgPath, pluginName] = process.argv.slice(2);
+if (!fs.existsSync(pkgPath)) process.exit(0);
+let raw;
+try { raw = fs.readFileSync(pkgPath, 'utf8'); } catch (e) { process.exit(0); }
+let json;
+try { json = JSON.parse(raw); } catch (e) { process.exit(0); }
+const bundles = json && json.dsh && json.dsh.profile && json.dsh.profile.bundles;
+if (Array.isArray(bundles) && bundles.includes(pluginName)) {
+  fs.copyFileSync(pkgPath, pkgPath + '.bak');
+  json.dsh.profile.bundles = bundles.filter((x) => x !== pluginName);
+  fs.writeFileSync(pkgPath, JSON.stringify(json, null, 2) + '\n');
+  console.log('removed ' + pluginName + ' from dsh.profile.bundles (backup: package.json.bak)');
+}
+NODE
+else
+  echo "warning: node not found; cannot auto-clean dsh.profile.bundles" >&2
+fi
+
 PATCH_FILE="$PROFILE_DIR/cordis.patch.yml"
 if [ ! -f "$PATCH_FILE" ]; then
   cp "$SRC_DIR/cordis.patch.yml" "$PATCH_FILE"
