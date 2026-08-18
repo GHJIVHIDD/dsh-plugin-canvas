@@ -35,18 +35,16 @@
 | 路径最小化 | 客户端只显示文件 basename 或完整 URL，不暴露本地绝对路径。 |
 | 沙箱 iframe | 预览使用 `sandbox="allow-scripts allow-modals allow-forms allow-popups"`，**不启用** `allow-same-origin`，预览页面无法访问宿主页面数据。 |
 | URL 凭据剥离 | 远程 URL 若带有 `user:pass@`，会在请求前移除，避免把凭据发送给目标服务器。 |
-| 日志最小化 | 插件日志只输出路由/工具注册状态，不打印 HTML 内容或文件路径。 |
 
 > 提示：如果你需要预览包含真实密钥的本地页面，请先在页面中自行替换为占位符，或使用 `DSH_CANVAS_ALLOW_ROOTS` 明确授权目录；插件仍会尽力打码常见密钥格式。
 
 ## 🚀 Install / 安装
 
 > ⚠️ **重要：每个插件只注册一次，不要同时使用两条安装路径。**
->
+> 
 > - `dsh plugin add`（方式 A / B）会把插件加入 `dsh.profile.bundles`，插件自带的 `cordis.patch.yml` 会作为 bundle 层自动生效，**不需要再手动往 `cordis.patch.yml` 里加 `ui-canvas`**。
 > - `./install.sh` 或手动 patch（方式 C / D）走 `cordis.patch.yml` 注册，**不要再用 `dsh plugin add`**。
 > - 如果同时出现两份 `ui-canvas`，DSH 会报 `duplicate loader entry id: ui-canvas`。修复方式：二选一删除。`./install.sh` 已会自动从 `dsh.profile.bundles` 中移除本插件，避免重复。
-
 
 ### 方式 A：从 GitHub 源码安装（推荐）
 
@@ -156,7 +154,6 @@ dsh --profile web
 
 如果重启后仍然 `HTTP 200`，请用 `dsh --profile web --dump-config` 检查 `ui-canvas` 是否只出现一次。
 
-
 ## 🧩 Architecture / 架构
 
 ```
@@ -166,8 +163,8 @@ dsh --profile web
 │ 沙箱 iframe + 标注/备注                │  /canvas-api/* │ /canvas-api/render                  │
 │ 每 2 秒轮询状态                        │ ◀───────── │ /canvas-api/annotate                 │
 └──────────────────────────────────────┘            │ /canvas-api/clear                     │
-                                                    │ 内存态 + 隐私脱敏 + 文件/URL 读取      │
-                                                    └──────────────────────────────────────┘
+                                                     │ 内存态 + 隐私脱敏 + 文件/URL 读取      │
+                                                     └──────────────────────────────────────┘
 ```
 
 - 客户端注册 `conversation.view` 的 `canvas` 页签，使用与现有页签一致的主题变量。
@@ -199,73 +196,7 @@ dsh --profile web
 }
 ```
 
-## 🤖 canvas_preview 工具说明
+### License
 
-### 参数
-
-| 参数 | 类型 | 必填 | 说明 |
-|---|---|---|---|
-| `mode` | `string` | 是 | `render` / `annotate` / `clear`，默认 `render` |
-| `html` | `string` | 否 | 完整 HTML 文档字符串 |
-| `file` | `string` | 否 | 本地 HTML 文件路径（需在允许目录内） |
-| `url` | `string` | 否 | 远程 HTML 页面 URL（http/https） |
-| `title` | `string` | 否 | 画布标题 |
-| `annotations` | `array` | 否 | `{ x, y, note }`，坐标为画布宽高百分比 0-100 |
-| `notes` | `array` | 否 | 自由文字备注 |
-
-### 使用示例（智能体视角）
-
-```text
-请把 /workspace/design/index.html 渲染到画布，并标注“导航栏间距过大”。
-→ canvas_preview(mode="render", file="/workspace/design/index.html",
-                 annotations=[{"x":50,"y":12,"note":"导航栏间距过大，建议改为 24px"}])
-```
-
-```text
-在刚才的画布上追加两条备注。
-→ canvas_preview(mode="annotate", notes=["按钮圆角建议统一为 8px", "移动端需要补充断点"])
-```
-
-```text
-清空画布。
-→ canvas_preview(mode="clear")
-```
-
-## 📦 Package structure / 包结构
-
-```
-dsh-plugin-canvas/
-├── package.json          # dsh.bundle + dsh.client 声明、exports["./client"]
-├── cordis.patch.yml      # bundle 补丁：插入 ui-canvas 页签
-├── lib/
-│   ├── index.js          # host 半区（webServer /canvas-api/* + canvas_preview 工具）
-│   ├── client.js         # client 半区（画布页签）
-│   └── types/index.d.ts  # host 类型声明
-├── scripts/verify.mjs    # 离线验证
-├── install.sh            # 免 pnpm 安装脚本
-└── README.md / LICENSE
-```
-
-## ✅ Verify / 离线验证
-
-```sh
-node scripts/verify.mjs
-```
-
-覆盖：双半区语法检查 → host ESM 导出 → mock ctx 下 4 个路由注册 → `canvas_preview` 工具注册 → 会话销毁清理监听 → client bundle 沙箱模拟执行。
-
-## 🔧 Configuration / 配置
-
-| 环境变量 | 说明 | 默认值 |
-|---|---|---|
-| `DSH_CANVAS_ALLOW_ROOTS` | 额外允许读取的本地目录，多个用 `:` 分隔 | 当前工作目录 + `~/.dsh/canvas` |
-
-示例：
-
-```bash
-DSH_CANVAS_ALLOW_ROOTS=/Users/me/designs:/Users/me/prototypes dsh --profile web
-```
-
-## 📄 License
-
-[MIT](./LICENSE)
+This project is licensed under the Apache License 2.0.
+See the full license at https://www.apache.org/licenses/LICENSE-2.0.
